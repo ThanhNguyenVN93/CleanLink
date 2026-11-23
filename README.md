@@ -1,4 +1,4 @@
-# CleanLink (v1.0.0)
+# CleanLink (v1.0.1)
 
 Công cụ nhỏ gọn viết bằng **C# (.NET Framework 3.5)** giúp xóa toàn bộ khoảng trắng khỏi các đường link bị chèn dấu cách (ví dụ: `https:/ /drive . google. com/...`) và tự động mở bằng trình duyệt mặc định.
 
@@ -7,7 +7,7 @@ Công cụ nhỏ gọn viết bằng **C# (.NET Framework 3.5)** giúp xóa toà
 - **Xóa khoảng trắng & Mở**: Dán link có khoảng trắng, nhấn `Enter` hoặc bấm nút để làm sạch và mở ngay trong trình duyệt.
 - **Dán từ Clipboard & Mở**: Đọc nhanh link từ Clipboard, làm sạch và truy cập chỉ với 1 click.
 - **Hỗ trợ dòng lệnh (CLI)**: Có thể truyền trực tiếp link qua tham số dòng lệnh (`CleanLink.exe "https:/ /example . com"`).
-- **Kiểm tra URL an toàn**: Chỉ mở các đường dẫn hợp lệ có giao thức `http://` hoặc `https://`.
+- **Kiểm tra URL an toàn**: Chỉ mở các đường dẫn hợp lệ có giao thức `http://` hoặc `https://`, có tên miền hợp lệ (có dấu `.` hoặc `localhost`), đồng thời kiểm tra nhanh DNS và phản hồi HTTP (chặn link 404/410 hoặc trang web không phản hồi/die).
 - **Bản `.bat` dự phòng (`CleanLink.bat`)**: Dành cho máy không có .NET Framework 3.5, chạy trực tiếp bằng Windows Batch + PowerShell tích hợp sẵn.
 
 ## Biên dịch (.NET Framework 3.5)

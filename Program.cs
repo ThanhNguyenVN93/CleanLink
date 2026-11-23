@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -96,6 +97,17 @@ namespace CleanLink
             }
 
             txtUrl.Text = cleanUrl;
+            lblStatus.ForeColor = Color.DimGray;
+            lblStatus.Text = "Đang kiểm tra link...";
+            Application.DoEvents();
+
+            if (!Program.CheckUrlAlive(cleanUrl, out error))
+            {
+                lblStatus.ForeColor = Color.Firebrick;
+                lblStatus.Text = error;
+                return;
+            }
+
             try
             {
                 Process.Start(new ProcessStartInfo(cleanUrl) { UseShellExecute = true });
@@ -131,7 +143,79 @@ namespace CleanLink
                 return false;
             }
 
+            string host = uri.Host ?? "";
+            bool isLocal = host.Equals("localhost", StringComparison.OrdinalIgnoreCase);
+            if (!isLocal && (!host.Contains(".") || host.StartsWith(".") || host.EndsWith(".") || host.Contains("..")))
+            {
+                error = "URL không hợp lệ (tên miền thiếu phần mở rộng, ví dụ .com).";
+                return false;
+            }
+
             return true;
+        }
+
+        public static bool CheckUrlAlive(string url, out string error)
+        {
+            error = null;
+            Uri uri = new Uri(url);
+
+            try
+            {
+                IPAddress[] addrs = Dns.GetHostAddresses(uri.Host);
+                if (addrs == null || addrs.Length == 0)
+                {
+                    error = "Tên miền không tồn tại (DNS lỗi).";
+                    return false;
+                }
+            }
+            catch
+            {
+                error = "Tên miền không tồn tại hoặc không phân giải được DNS.";
+                return false;
+            }
+
+            try
+            {
+                HttpWebRequest req = (HttpWebRequest)WebRequest.Create(uri);
+                req.Method = "HEAD";
+                req.Timeout = 4000;
+                req.ReadWriteTimeout = 4000;
+                req.AllowAutoRedirect = true;
+                req.UserAgent = "Mozilla/5.0";
+                using (HttpWebResponse resp = (HttpWebResponse)req.GetResponse())
+                {
+                    int code = (int)resp.StatusCode;
+                    if (code == 404 || code == 410)
+                    {
+                        error = "Link không tồn tại (HTTP " + code + ").";
+                        return false;
+                    }
+                    return true;
+                }
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse resp = ex.Response as HttpWebResponse;
+                if (resp != null)
+                {
+                    int code = (int)resp.StatusCode;
+                    if (code == 404 || code == 410)
+                    {
+                        error = "Link không tồn tại (HTTP " + code + ").";
+                        return false;
+                    }
+                    // 401, 403, 405, etc. mean the server is alive
+                    return true;
+                }
+
+                error = "Trang web không phản hồi (die/timeout).";
+                return false;
+            }
+            catch
+            {
+                error = "Không thể kết nối tới trang web.";
+                return false;
+            }
         }
 
         [STAThread]
@@ -142,7 +226,7 @@ namespace CleanLink
                 string raw = string.Join(" ", args);
                 string cleanUrl;
                 string error;
-                if (CleanAndValidateUrl(raw, out cleanUrl, out error))
+                if (CleanAndValidateUrl(raw, out cleanUrl, out error) && CheckUrlAlive(cleanUrl, out error))
                 {
                     Process.Start(new ProcessStartInfo(cleanUrl) { UseShellExecute = true });
                     return;
