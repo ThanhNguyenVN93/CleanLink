@@ -8,6 +8,7 @@ Công cụ nhỏ gọn viết bằng **C# (.NET Framework 3.5)** giúp xóa toà
 - **Dán từ Clipboard & Mở**: Đọc nhanh link từ Clipboard, làm sạch và truy cập chỉ với 1 click.
 - **Hỗ trợ dòng lệnh (CLI)**: Có thể truyền trực tiếp link qua tham số dòng lệnh (`CleanLink.exe "https:/ /example . com"`).
 - **Kiểm tra URL an toàn**: Chỉ mở các đường dẫn hợp lệ có giao thức `http://` hoặc `https://`.
+- **Bản `.bat` dự phòng (`CleanLink.bat`)**: Dành cho máy không có .NET Framework 3.5, chạy trực tiếp bằng Windows Batch + PowerShell tích hợp sẵn.
 
 ## Biên dịch (.NET Framework 3.5)
 ```powershell
